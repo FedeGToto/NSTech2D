@@ -1,0 +1,181 @@
+﻿using System;
+using System.IO;
+
+namespace NSTech2D.RenderEngine
+{
+    public class Texture : IDisposable
+    {
+        protected int textureId;
+        private int width;
+        private int height;
+        private byte[] bitmap;
+        protected bool premultiplied;
+
+        public bool flipped = false;
+
+        public int Id
+        {
+            get
+            {
+                return textureId;
+            }
+        }
+
+        private bool disposed;
+
+        public int Width
+        {
+            get
+            {
+                return this.width;
+            }
+        }
+        public int Height
+        {
+            get
+            {
+                return this.height;
+            }
+        }
+        public float Ratio
+        {
+            get
+            {
+                return (float)this.width / (float)this.Height;
+            }
+        }
+        public byte[] Bitmap
+        {
+            get
+            {
+                return this.bitmap;
+            }
+        }
+        public bool IsPremultiplied
+        {
+            get
+            {
+                return premultiplied;
+            }
+        }
+
+        public Texture(bool nearest = false, bool repeatX = false, bool repeatY = false, bool mipMap = false)
+        {
+            this.textureId = Graphics.NewTexture();
+
+            this.Bind();
+
+            if (nearest)
+            {
+                this.SetNearest(mipMap);
+            } else
+            {
+                this.SetLinear(mipMap);
+            }
+
+            this.SetRepeatX(repeatX);
+            this.SetRepeatY(repeatY);
+        }
+        public Texture (int width, int height, bool nearest = false, bool repeatX = false, bool repeatY = false, bool mipMap = false) : this (nearest, repeatX, repeatY, mipMap)
+        {
+            this.width = width;
+            this.height = height;
+            this.bitmap = new byte[this.width * this.height * 4];
+            this.Update();
+        }
+        public Texture(string fileName, bool nearest = false, bool repeatX = false, bool repeatY = false, bool mipMap = false) : this(nearest, repeatX, repeatY, mipMap)
+        {
+            this.premultiplied = true;
+            this.bitmap = Window.LoadImage(fileName, premultiplied, out this.width, out this.height);
+            this.Update();
+        }
+        public Texture(Stream stream, bool nearest = false, bool repeatX = false, bool repeatY = false, bool mipMap = false) : this(nearest, repeatX, repeatY, mipMap)
+        {
+            this.premultiplied = true;
+            this.bitmap = Window.LoadImage(stream, premultiplied, out this.width, out this.height);
+            this.Update();
+        }
+
+        public void Update(byte[] bitmap, int mipMap = 0)
+        {
+            this.Bind();
+            if (mipMap == 0)
+            {
+                this.bitmap = bitmap;
+            }
+            Graphics.TextureBitmap(width, height, bitmap, mipMap);
+        }
+        public void Update(int mipMap = 0)
+        {
+            this.Update(this.bitmap, mipMap);
+        }
+
+        public void AddMipMap(int mipMap, string fileName)
+        {
+            int mipMapWidth;
+            int mipMapHeight;
+            this.premultiplied = true;
+            byte[] mipMapBitmap = Window.LoadImage(fileName, premultiplied, out mipMapWidth, out mipMapHeight);
+            int excpetedWidth = this.width / (int)Math.Pow(2, mipMap);
+            int excpetedHeight = this.height / (int)Math.Pow(2, mipMap);
+
+            if (width != excpetedWidth || height != excpetedHeight)
+                throw new Exception("invalid mipmap size");
+
+
+            this.Update(this.bitmap, mipMap);
+        }
+
+        public void SetRepeatY(bool repeat = true)
+        {
+            this.Bind();
+            Graphics.TextureSetRepeatY(repeat);
+        }
+        public void SetRepeatX(bool repeat = true)
+        {
+            this.Bind();
+            Graphics.TextureSetRepeatX(repeat);
+        }
+
+        public void SetLinear(bool mipMap = false)
+        {
+            this.Bind();
+            Graphics.TextureSetLinear(mipMap);
+        }
+        public void SetNearest(bool mipMap = false)
+        {
+            this.Bind();
+            Graphics.TextureSetNearest(mipMap);
+        }
+
+        public void Bind(int unit = 0)
+        {
+            Graphics.BindTextureToUnit(this.textureId, unit);
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+                return;
+            Graphics.DeleteTexture(this.textureId);
+            Window.Current.Log($"texture {this.textureId} deleted");
+            disposed = true;
+        }
+
+        public virtual byte[] Download(int mipMap = 0)
+        {
+            byte[] data = new byte[this.Width * this.Height * 4];
+            this.Bind();
+            Graphics.TextureGetPixels(mipMap, data);
+            return data;
+        }
+
+        ~Texture()
+        {
+            if (disposed)
+                return;
+            Window.Current.textureGC.Add(this.textureId);
+            disposed = true;
+        }
+    }
+}
