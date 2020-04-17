@@ -103,7 +103,7 @@ namespace NSTech2D.RenderEngine
             get
             {
                 List<string> displays = new List<string>();
-                for (int i = 0; i < (int)DisplayIndex.Sixth; i++)
+                for (int i = 0; i <= (int)DisplayIndex.Sixth; i++)
                 {
                     DisplayDevice device = DisplayDevice.GetDisplay((DisplayIndex)i);
                     if (device != null)
@@ -130,6 +130,7 @@ namespace NSTech2D.RenderEngine
         {
             return SetResolution(new Vector2(screenWidth, screenHeight));
         }
+
         public bool SetResolution(Vector2 newResolution)
         {
             foreach (DisplayResolution resolution in DisplayDevice.Default.AvailableResolutions)
@@ -160,12 +161,11 @@ namespace NSTech2D.RenderEngine
 
         public Window(string title, int depthSize = 16, int antialiasingSamples = 0, int stencilBuffers = 0) : this(DisplayDevice.Default.Width, DisplayDevice.Default.Height, title, true, depthSize, antialiasingSamples, stencilBuffers)
         {
-
         }
 
-        public Window(int width, int height, string title, bool fullscreen = false, int depthSize = 16, int antialiasingSamples = 0, int stencilBuffers = 0)
+        public Window(int width, int height, string title, bool fullScreen = false, int depthSize = 16, int antialiasingSamples = 0, int stencilBuffers = 0)
         {
-            // force OpenGL 3.3 this is a good compromise
+            // force opengl 3.3 this is a good compromise
             int major = 3;
             int minor = 3;
             if (obsoleteMode)
@@ -173,27 +173,26 @@ namespace NSTech2D.RenderEngine
                 major = 2;
                 minor = 2;
             }
-
             this.context = new GameWindow(width, height, new OpenTK.Graphics.GraphicsMode(32, depthSize, stencilBuffers, antialiasingSamples), title,
-                fullscreen ? GameWindowFlags.Fullscreen : GameWindowFlags.FixedWindow,
+                fullScreen ? GameWindowFlags.Fullscreen : GameWindowFlags.FixedWindow,
                 DisplayDevice.Default, major, minor, OpenTK.Graphics.GraphicsContextFlags.Default);
 
-            if (fullscreen)
+            if (fullScreen)
             {
                 this.context.Location = new Point(0, 0);
             }
 
             watch = new Stopwatch();
 
-            // Enable VSync by default
+            // enable vsync by default
             this.SetVSync(true);
 
             FixDimensions(width, height, true);
 
             this.context.Closed += new EventHandler<EventArgs>(this.Close);
-            this.context.Move = +(sender, e) =>
+            this.context.Move += (sender, e) =>
             {
-                // avoid delta time to become huge while move
+                // avoid deltaTime to became huge while moving the window
                 this.watch.Stop();
             };
             this.context.Visible = true;
@@ -202,9 +201,7 @@ namespace NSTech2D.RenderEngine
             Graphics.Setup();
 
             if (antialiasingSamples > 0)
-            {
                 Graphics.EnableMultisampling();
-            }
 
             FinalizeSetup();
 
@@ -217,7 +214,8 @@ namespace NSTech2D.RenderEngine
             if (enable)
             {
                 this.context.VSync = VSyncMode.On;
-            } else
+            }
+            else
             {
                 this.context.VSync = VSyncMode.Off;
             }
@@ -236,13 +234,518 @@ namespace NSTech2D.RenderEngine
             }
         }
 
+        private void FixDimensions(int width, int height, bool first = false)
+        {
+            this.width = width;
+            this.height = height;
+
+            if (!first)
+            {
+                this.context.Width = (int)(this.width * this.scaleX);
+                this.context.Height = (int)(this.height * this.scaleY);
+            }
+            this.scaleX = (float)this.context.Width / (float)this.width;
+            this.scaleY = (float)this.context.Height / (float)this.height;
+
+            // setup viewport
+            this.SetViewport(0, 0, width, height);
+
+            // required for updating context !
+            this.context.Context.Update(this.context.WindowInfo);
+            this.SetClearColor(0f, 0f, 0f, 1f);
+            this.ClearColor();
+            this.context.SwapBuffers();
+        }
+
+        public void SetIcon(string fileName)
+        {
+            Icon icon = null;
+
+            Assembly assembly = Assembly.GetEntryAssembly();
+
+            // if the file in included in the resources, load it as stream
+            if (assembly.GetManifestResourceNames().Contains<string>(fileName))
+            {
+                Stream iconStream = assembly.GetManifestResourceStream(fileName);
+                icon = new Icon(iconStream);
+
+            }
+            else
+            {
+                icon = new Icon(fileName);
+            }
+            this.context.Icon = icon;
+        }
+
+        public void SetFullScreen(bool enable)
+        {
+            this.context.WindowState = enable ? WindowState.Fullscreen : WindowState.Normal;
+            this.FixDimensions(width, height);
+        }
+
+        public void SetSize(int width, int height)
+        {
+            this.context.WindowState = WindowState.Normal;
+            this.FixDimensions(width, height);
+        }
+
+        public void SetCursor(bool enable)
+        {
+            this.context.CursorVisible = enable;
+        }
+
+        public string Title
+        {
+            get
+            {
+                return this.context.Title;
+            }
+            set
+            {
+                this.context.Title = value;
+            }
+        }
+
+
+        public void Update()
+        {
+
+            // apply postprocessing (if required)
+            ApplyPostProcessingEffects();
+
+            // redraw
+            this.context.SwapBuffers();
+
+            // cleanup graphics resources
+            RunGraphicsGC();
+
+            // update input
+            this._keyboardState = Keyboard.GetState();
+            this._mouseState = Mouse.GetCursorState();
+
+            // get next events
+            this.context.ProcessEvents();
+
+            // avoid negative values
+            this._deltaTime = this.watch.Elapsed.TotalSeconds > 0 ? (float)this.watch.Elapsed.TotalSeconds : 0f;
+
+            this.watch.Reset();
+            this.watch.Start();
+
+
+            // reset and clear
+            ResetFrameBuffer();
+        }
+
+        #region input
+
+        private KeyboardState _keyboardState;
+        private MouseState _mouseState;
+
+        public float mouseX
+        {
+            get
+            {
+                Point p = new Point(this._mouseState.X, this._mouseState.Y);
+                return ((float)this.context.PointToClient(p).X / this.scaleX - this.viewportPosition.X) / (this.viewportSize.X / this.OrthoWidth);
+            }
+        }
+
+        public float mouseY
+        {
+            get
+            {
+                Point p = new Point(this._mouseState.X, this._mouseState.Y);
+                return ((float)this.context.PointToClient(p).Y / this.scaleY - this.viewportPosition.Y) / (this.viewportSize.Y / this.OrthoHeight);
+            }
+        }
+
+        public Vector2 mousePosition
+        {
+            get
+            {
+                return new Vector2(mouseX, mouseY);
+            }
+        }
+
+        public float RawMouseX
+        {
+            get
+            {
+                return OpenTK.Input.Mouse.GetState().X;
+            }
+        }
+
+        public float RawMouseY
+        {
+            get
+            {
+                return OpenTK.Input.Mouse.GetState().Y;
+            }
+        }
+
+        public Vector2 RawMousePosition
+        {
+            get
+            {
+                return new Vector2(RawMouseX, RawMouseY);
+            }
+        }
+
+        public bool mouseLeft
+        {
+            get
+            {
+                return this._mouseState.IsButtonDown(MouseButton.Left);
+            }
+        }
+
+        public bool mouseRight
+        {
+            get
+            {
+                return this._mouseState.IsButtonDown(MouseButton.Right);
+            }
+        }
+
+        public bool mouseMiddle
+        {
+            get
+            {
+                return this._mouseState.IsButtonDown(MouseButton.Middle);
+            }
+        }
+
+        public float MouseWheel
+        {
+            get
+            {
+                return this._mouseState.WheelPrecise;
+            }
+        }
+
+        public bool MouseButton1
+        {
+            get
+            {
+                return this._mouseState.IsButtonDown(MouseButton.Button1);
+            }
+        }
+
+        public bool MouseButton2
+        {
+            get
+            {
+                return this._mouseState.IsButtonDown(MouseButton.Button2);
+            }
+        }
+
+        public bool MouseButton3
+        {
+            get
+            {
+                return this._mouseState.IsButtonDown(MouseButton.Button3);
+            }
+        }
+
+        public bool MouseButton4
+        {
+            get
+            {
+                return this._mouseState.IsButtonDown(MouseButton.Button4);
+            }
+        }
+
+        public bool MouseButton5
+        {
+            get
+            {
+                return this._mouseState.IsButtonDown(MouseButton.Button5);
+            }
+        }
+
+        public bool MouseButton6
+        {
+            get
+            {
+                return this._mouseState.IsButtonDown(MouseButton.Button6);
+            }
+        }
+
+        public bool MouseButton7
+        {
+            get
+            {
+                return this._mouseState.IsButtonDown(MouseButton.Button7);
+            }
+        }
+
+        public bool MouseButton8
+        {
+            get
+            {
+                return this._mouseState.IsButtonDown(MouseButton.Button8);
+            }
+        }
+
+        public bool MouseButton9
+        {
+            get
+            {
+                return this._mouseState.IsButtonDown(MouseButton.Button9);
+            }
+        }
+
+
+        public bool GetKey(KeyCode key)
+        {
+            return this._keyboardState.IsKeyDown((Key)key);
+        }
+
+        public string[] Joysticks
+        {
+            get
+            {
+                string[] joysticks = new string[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    if (GamePad.GetState(i).IsConnected)
+                        joysticks[i] = GamePad.GetName(i);
+                    else
+                        joysticks[i] = null;
+                }
+                return joysticks;
+            }
+        }
+
+        public Vector2 JoystickAxisLeftRaw(int index)
+        {
+            return GamePad.GetState(index).ThumbSticks.Left;
+        }
+
+        public Vector2 JoystickAxisRightRaw(int index)
+        {
+            return GamePad.GetState(index).ThumbSticks.Right;
+        }
+
+        private Vector2 SanitizeJoystickVector(Vector2 axis, float threshold)
+        {
+            if (Math.Abs(axis.X) < threshold)
+                axis.X = 0;
+            if (Math.Abs(axis.X) > 1f - threshold)
+                axis.X = Math.Sign(axis.X);
+            if (Math.Abs(axis.Y) < threshold)
+                axis.Y = 0;
+            if (Math.Abs(axis.Y) > 1f - threshold)
+                axis.Y = Math.Sign(axis.Y);
+            axis.Y *= -1;
+            return axis;
+        }
+
+        public Vector2 JoystickAxisLeft(int index, float threshold = 0.1f)
+        {
+            Vector2 axis = GamePad.GetState(index).ThumbSticks.Left;
+            return SanitizeJoystickVector(axis, threshold);
+        }
+
+        public Vector2 JoystickAxisRight(int index, float threshold = 0.1f)
+        {
+            Vector2 axis = GamePad.GetState(index).ThumbSticks.Right;
+            return SanitizeJoystickVector(axis, threshold);
+        }
+
+        public float JoystickTriggerLeftRaw(int index)
+        {
+            return GamePad.GetState(index).Triggers.Left;
+        }
+
+        public float JoystickTriggerRightRaw(int index)
+        {
+            return GamePad.GetState(index).Triggers.Right;
+        }
+
+        private float SanitizeJoystickTrigger(float value, float threshold)
+        {
+            if (value < threshold)
+                return 0;
+            if (value > 1f - threshold)
+                return 1f;
+            return value;
+        }
+
+        public float JoystickTriggerLeft(int index, float threshold = 0.1f)
+        {
+            float trigger = GamePad.GetState(index).Triggers.Left;
+            return SanitizeJoystickTrigger(trigger, threshold);
+        }
+
+        public float JoystickTriggerRight(int index, float threshold = 0.1f)
+        {
+            float trigger = GamePad.GetState(index).Triggers.Right;
+            return SanitizeJoystickTrigger(trigger, threshold);
+        }
+
+        public bool JoystickShoulderLeft(int index)
+        {
+            return GamePad.GetState(index).Buttons.LeftShoulder == ButtonState.Pressed;
+        }
+
+        public bool JoystickShoulderRight(int index)
+        {
+            return GamePad.GetState(index).Buttons.RightShoulder == ButtonState.Pressed;
+        }
+
+        public bool JoystickLeftStick(int index)
+        {
+            return GamePad.GetState(index).Buttons.LeftStick == ButtonState.Pressed;
+        }
+
+        public bool JoystickRightStick(int index)
+        {
+            return GamePad.GetState(index).Buttons.RightStick == ButtonState.Pressed;
+        }
+
+        public bool JoystickUp(int index)
+        {
+            return GamePad.GetState(index).DPad.IsUp;
+        }
+
+        public bool JoystickDown(int index)
+        {
+            return GamePad.GetState(index).DPad.IsDown;
+        }
+
+        public bool JoystickRight(int index)
+        {
+            return GamePad.GetState(index).DPad.IsRight;
+        }
+
+        public bool JoystickLeft(int index)
+        {
+            return GamePad.GetState(index).DPad.IsLeft;
+        }
+
+        public void JoystickVibrate(int index, float left, float right)
+        {
+            GamePad.SetVibration(index, left, right);
+        }
+
+        public bool JoystickA(int index)
+        {
+            return GamePad.GetState(index).Buttons.A == ButtonState.Pressed;
+        }
+
+        public bool JoystickB(int index)
+        {
+            return GamePad.GetState(index).Buttons.B == ButtonState.Pressed;
+        }
+
+        public bool JoystickX(int index)
+        {
+            return GamePad.GetState(index).Buttons.X == ButtonState.Pressed;
+        }
+
+        public bool JoystickBack(int index)
+        {
+            return GamePad.GetState(index).Buttons.Back == ButtonState.Pressed;
+        }
+
+        public bool JoystickStart(int index)
+        {
+            return GamePad.GetState(index).Buttons.Start == ButtonState.Pressed;
+        }
+
+        public bool JoystickBigButton(int index)
+        {
+            return GamePad.GetState(index).Buttons.BigButton == ButtonState.Pressed;
+        }
+
+        public bool JoystickY(int index)
+        {
+            return GamePad.GetState(index).Buttons.Y == ButtonState.Pressed;
+        }
+
+        public string JoystickDebug(int index)
+        {
+            return GamePad.GetState(index).ToString();
+        }
+
+        #endregion
+
+
+
         public static byte[] LoadImage(string fileName, bool premultiplied, out int width, out int height)
         {
-            throw new NotImplementedException();
+            Assembly assembly = Assembly.GetEntryAssembly();
+            Stream imageStream = null;
+
+            // if the file in included in the resources, load it as stream
+            if (assembly.GetManifestResourceNames().Contains<string>(fileName))
+            {
+                imageStream = assembly.GetManifestResourceStream(fileName);
+            }
+
+            if (imageStream == null)
+            {
+                imageStream = new FileStream(fileName, FileMode.Open);
+            }
+
+            return LoadImage(imageStream, premultiplied, out width, out height);
+
         }
         public static byte[] LoadImage(Stream imageStream, bool premultiplied, out int width, out int height)
         {
-            throw new NotImplementedException();
+            {
+                byte[] bitmap = null;
+                Bitmap image = null;
+
+
+                image = new Bitmap(imageStream);
+
+                using (image)
+                {
+                    // to avoid losing a ref
+                    Bitmap _image = image;
+                    bitmap = new byte[image.Width * image.Height * 4];
+                    width = image.Width;
+                    height = image.Height;
+                    // if the image is not rgba, let's fix it
+                    if (image.PixelFormat != System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+                    {
+                        _image = image.Clone(new Rectangle(0, 0, image.Width, image.Height), System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    }
+
+                    System.Drawing.Imaging.BitmapData data = _image.LockBits(new Rectangle(0, 0, width, height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    Marshal.Copy(data.Scan0, bitmap, 0, bitmap.Length);
+                    _image.UnlockBits(data);
+
+                    for (int y = 0; y < _image.Height; y++)
+                    {
+                        for (int x = 0; x < _image.Width; x++)
+                        {
+                            int position = (y * _image.Width * 4) + (x * 4);
+                            // bgra -> rgba
+                            byte b = bitmap[position];
+                            byte r = bitmap[position + 2];
+                            bitmap[position] = r;
+                            bitmap[position + 2] = b;
+                            // premultiply
+                            if (premultiplied)
+                            {
+                                byte a = bitmap[position + 3];
+                                bitmap[position] = (byte)(bitmap[position] * (a / 255f));
+                                bitmap[position + 1] = (byte)(bitmap[position + 1] * (a / 255f));
+                                bitmap[position + 2] = (byte)(bitmap[position + 2] * (a / 255f));
+                            }
+                        }
+                    }
+                }
+
+
+                imageStream.Close();
+
+                return bitmap;
+            }
         }
     }
 }

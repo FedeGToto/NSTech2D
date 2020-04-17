@@ -47,26 +47,45 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Engine\Actor.cs" />
+    <Compile Include="Engine\UI\Text\Font.cs" />
+    <Compile Include="Engine\UI\Text\FontManager.cs" />
+    <Compile Include="Engine\Controllers\Controller.cs" />
     <Compile Include="Engine\DrawManager.cs" />
     <Compile Include="Engine\Game.cs" />
     <Compile Include="Engine\GameObject.cs" />
+    <Compile Include="Engine\GraphicsManager.cs" />
     <Compile Include="Engine\IDrawable.cs" />
     <Compile Include="Engine\IUpdatable.cs" />
+    <Compile Include="Engine\RandomGenerator.cs" />
     <Compile Include="Engine\Scene.cs" />
+    <Compile Include="Engine\UI\ProgressBar.cs" />
+    <Compile Include="Engine\UI\Text\TextChar.cs" />
+    <Compile Include="Engine\UI\Text\TextObject.cs" />
     <Compile Include="Engine\UpdateManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RenderEngine\Camera.cs" />
     <Compile Include="RenderEngine\Graphics_OpenGL.cs" />
     <Compile Include="RenderEngine\ILogger.cs" />
+    <Compile Include="RenderEngine\InstancedSprite.cs" />
+    <Compile Include="RenderEngine\Mesh.cs" />
+    <Compile Include="RenderEngine\PostProcessingEffect.cs" />
     <Compile Include="RenderEngine\RenderTexture.cs" />
+    <Compile Include="RenderEngine\Shader.cs" />
+    <Compile Include="RenderEngine\Sprite.cs" />
     <Compile Include="RenderEngine\Texture.cs" />
     <Compile Include="RenderEngine\Window.cs" />
     <Compile Include="RenderEngine\Window_Desktop.cs" />
+    <Compile Include="Scenes\StartupScene.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Engine\Collision\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

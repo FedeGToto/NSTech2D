@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NSTech2D.Engine
+﻿namespace NSTech2D.Engine
 {
     abstract class Scene
     {

@@ -52,6 +52,9 @@ namespace NSTech2D.RenderEngine
             this.flipped = true;
         }
 
-        //public void ApplyPostProcessingEffect(PostProcessingEffect effect)
+        public void ApplyPostProcessingEffect(PostProcessingEffect effect)
+        {
+            effect.Apply(this);
+        }
     }
 }
