@@ -58,6 +58,15 @@
     <Compile Include="Engine\PhysiscsManager.cs" />
     <Compile Include="Engine\RandomTimer.cs" />
     <Compile Include="Engine\Rigidbody.cs" />
+    <Compile Include="Engine\Tiled\TileGrid.cs" />
+    <Compile Include="Engine\Tiled\TileGridFactory.cs" />
+    <Compile Include="Engine\Tiled\TileInstance.cs" />
+    <Compile Include="Engine\Tiled\TileObj.cs" />
+    <Compile Include="Engine\Tiled\TileSet.cs" />
+    <Compile Include="Engine\Tiled\TileSetFactory.cs" />
+    <Compile Include="Engine\Tiled\TileType.cs" />
+    <Compile Include="Engine\Tiled\TmxNodeParser.cs" />
+    <Compile Include="Engine\Tiled\TmxReader.cs" />
     <Compile Include="Engine\UI\Text\Font.cs" />
     <Compile Include="Engine\UI\Text\FontManager.cs" />
     <Compile Include="Engine\Controllers\Controller.cs" />
@@ -91,12 +100,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Assets\map-8x8.tmx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\textSheet.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\tmw_desert_nospa.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

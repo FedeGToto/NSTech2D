@@ -21,7 +21,7 @@ namespace NSTech2D.Engine
             //Init the game
             Win = new Window(1280, 720, "NS Tech 2D");
             Win.SetVSync(true);
-            Win.SetDefaultOrthographicSize(10);
+            Win.SetDefaultOrthographicSize(720);
             OptimalScreenHeight = 1080;
 
             UnitSize = Win.Height / Win.OrthoHeight;
