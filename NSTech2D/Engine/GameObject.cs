@@ -1,6 +1,7 @@
 ﻿using System;
 using OpenTK;
 using NSTech2D.RenderEngine;
+using NSTech2D.Engine.Collisions;
 
 namespace NSTech2D.Engine
 {
@@ -12,7 +13,7 @@ namespace NSTech2D.Engine
         protected int textureOffsetY;
         protected DrawLayer layer;
 
-        //Rigidbody
+        public Rigidbody RigidBody;
 
         public virtual Vector2 position
         {
@@ -24,7 +25,7 @@ namespace NSTech2D.Engine
         public bool isActive;
 
         public float width { get { return sprite.Width; } }
-        public float height { get { return sprite.Height} }
+        public float height { get { return sprite.Height; } }
 
         public int x { get { return (int)sprite.position.X; } set { sprite.position.X = value; } }
         public int y { get { return (int)sprite.position.Y; } set { sprite.position.Y = value; } }
@@ -61,7 +62,10 @@ namespace NSTech2D.Engine
             }
         }
 
-        //OnCollide
+        public virtual void OnCollide(Collision collisionInfo)
+        {
+
+        }
 
         public virtual void Destroy()
         {
@@ -71,7 +75,11 @@ namespace NSTech2D.Engine
             UpdateManager.RemoveItem(this);
             DrawManager.RemoveItem(this);
 
-            //Remove rigidbody, if any
+            if (RigidBody != null)
+            {
+                RigidBody.Destroy();
+                RigidBody = null;
+            }
         }
     }
 }

@@ -12,5 +12,83 @@ namespace NSTech2D.Engine.UI.Text
         protected float hSpace;
 
         public Vector2 Position;
+
+        public bool IsActive
+        {
+            get { return isActive; }
+            set { isActive = value; UpdateCharStatus(value); }
+        }
+
+        public string Text
+        {
+            get { return text; }
+            set { SetText(value); }
+        }
+
+        public TextObject(Vector2 spritePos, string textString = "", Font font = null, float horizontalSpace = 0)
+        {
+            if (font == null)
+            {
+                font = FontManager.GetFont("stdFont");
+            }
+            this.font = font;
+            hSpace = horizontalSpace;
+
+            Position = spritePos;
+            sprites = new List<TextChar>();
+            if (textString != "")
+                SetText(textString);
+            IsActive = true;
+        }
+
+        private void SetText(string newText)
+        {
+            if (newText != text)
+            {
+                text = newText;
+                int numChars = text.Length;
+                float charX = Position.X;
+                float charY = Position.Y;
+
+                for (int i = 0; i < text.Length; i++)
+                {
+                    char c = text[i];
+
+                    if (i > sprites.Count - 1)//i is grather than last char index
+                    {
+                        TextChar tc = new TextChar(new Vector2(charX, charY), c, font);
+                        tc.isActive = true;
+                        sprites.Add(tc);
+                    }
+                    else if (c != sprites[i].Character)
+                    {
+                        sprites[i].Character = c;
+                    }
+
+                    charX += sprites[i].width + hSpace;
+                }
+
+                if (sprites.Count > text.Length)
+                {
+                    int count = sprites.Count - text.Length;
+                    int from = text.Length;
+
+                    for (int i = from; i < sprites.Count; i++)
+                    {
+                        sprites[i].Destroy();
+                    }
+
+                    sprites.RemoveRange(from, count);
+                }
+            }
+        }
+
+        protected virtual void UpdateCharStatus(bool activeStatus)
+        {
+            for (int i = 0; i < sprites.Count; i++)
+            {
+                sprites[i].isActive = activeStatus;
+            }
+        }
     }
 }

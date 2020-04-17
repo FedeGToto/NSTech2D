@@ -20,7 +20,7 @@ namespace NSTech2D.Engine
         {
             //Init the game
             Win = new Window(1280, 720, "NS Tech 2D");
-            Win.SetVSync(false);
+            Win.SetVSync(true);
             Win.SetDefaultOrthographicSize(10);
             OptimalScreenHeight = 1080;
 
@@ -69,6 +69,11 @@ namespace NSTech2D.Engine
                 currentScene.Draw();
                 Win.Update();
             }
+        }
+
+        public static RandomTimer RandomTimer(int timeMin, int timeMax)
+        {
+            return new RandomTimer(timeMin, timeMax);
         }
     }
 }

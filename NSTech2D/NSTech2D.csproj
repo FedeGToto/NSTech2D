@@ -48,6 +48,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Engine\Actor.cs" />
+    <Compile Include="Engine\Collisions\BoxCollider.cs" />
+    <Compile Include="Engine\Collisions\CircleCollider.cs" />
+    <Compile Include="Engine\Collisions\Collider.cs" />
+    <Compile Include="Engine\Collisions\Collision.cs" />
+    <Compile Include="Engine\Collisions\CompundCollider.cs" />
+    <Compile Include="Engine\Controllers\JoyPadController.cs" />
+    <Compile Include="Engine\Controllers\KeyboardController.cs" />
+    <Compile Include="Engine\PhysiscsManager.cs" />
+    <Compile Include="Engine\RandomTimer.cs" />
+    <Compile Include="Engine\Rigidbody.cs" />
     <Compile Include="Engine\UI\Text\Font.cs" />
     <Compile Include="Engine\UI\Text\FontManager.cs" />
     <Compile Include="Engine\Controllers\Controller.cs" />
@@ -85,7 +95,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Engine\Collision\" />
+    <Content Include="Assets\textSheet.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
