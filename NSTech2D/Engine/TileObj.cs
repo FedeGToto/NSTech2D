@@ -1,13 +1,14 @@
 ﻿using NSTech2D.RenderEngine;
+using OpenTK;
 
-namespace NSTech2D.Engine.Tiled
+namespace NSTech2D.Engine
 {
-    class TileObj : GameObject
+    class TileObj: GameObject
     {
         private int xOff;
         private int yOff;
 
-        public TileObj(string textureName,
+        public TileObj(string textureName, 
             int tOffX, int tOffY,
             int posX, int posY,
             int width, int height) : base(textureName)
@@ -15,6 +16,7 @@ namespace NSTech2D.Engine.Tiled
             sprite = new Sprite(width, height);
             sprite.position.X = posX;
             sprite.position.Y = posY;
+            sprite.pivot = new Vector2(sprite.Width * 0.5f, sprite.Height * 0.5f);
 
             xOff = tOffX;
             yOff = tOffY;
@@ -24,9 +26,9 @@ namespace NSTech2D.Engine.Tiled
 
         public override void Draw()
         {
-            if (isActive)
+           if (isActive)
             {
-                sprite.DrawTexture(texture, xOff, yOff, (int) width, (int) height);
+                sprite.DrawTexture(texture, xOff, yOff, (int)width, (int)height);
             }
         }
     }

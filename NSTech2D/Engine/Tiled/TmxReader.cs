@@ -1,12 +1,13 @@
-﻿using System;
-using System.Xml;
+﻿using System.Xml;
+using System;
+using System.Collections.Generic;
 
 namespace NSTech2D.Engine.Tiled
 {
     class TmxReader
     {
         public TileSet TileSet { get; }
-        public TileGrid TileGrid { get; }
+        public List<Layer> Layers { get; set; }
 
         public TmxReader(string filePath)
         {
@@ -23,7 +24,9 @@ namespace NSTech2D.Engine.Tiled
             XmlNode nodeMap = doc.SelectSingleNode("map");
 
             TileSet = TmxNodeParser.ParseTileset(nodeMap);
-            TileGrid = TmxNodeParser.ParseGrid(nodeMap, TileSet);
+            Layers = TmxNodeParser.ParseLayers(nodeMap, TileSet);
         }
+
+       
     }
 }

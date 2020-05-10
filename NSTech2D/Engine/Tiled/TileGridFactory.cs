@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace NSTech2D.Engine.Tiled
 {
     class TileGridFactory
@@ -10,8 +11,7 @@ namespace NSTech2D.Engine.Tiled
 
             int xPos = 0;
             int yPos = 0;
-            for (int row = 0; row < rows; row++)
-            {
+            for (int row = 0; row < rows; row++) {
                 for (int col = 0; col < cols; col++)
                 {
                     int id = int.Parse(tileIds[row * cols + col]);

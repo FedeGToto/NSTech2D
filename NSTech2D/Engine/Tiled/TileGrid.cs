@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace NSTech2D.Engine.Tiled
 {
     class TileGrid

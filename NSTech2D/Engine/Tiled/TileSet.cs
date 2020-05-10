@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace NSTech2D.Engine.Tiled
 {
     class TileSet
@@ -21,7 +22,7 @@ namespace NSTech2D.Engine.Tiled
             ImgPath = tsImgPath;
         }
 
-
+     
         public TileType At(int index)
         {
             return types[index];

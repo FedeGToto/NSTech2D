@@ -51,6 +51,7 @@
     <Compile Include="Engine\Collisions\BoxCollider.cs" />
     <Compile Include="Engine\Collisions\CircleCollider.cs" />
     <Compile Include="Engine\Collisions\Collider.cs" />
+    <Compile Include="Engine\Collisions\ColliderFactory.cs" />
     <Compile Include="Engine\Collisions\Collision.cs" />
     <Compile Include="Engine\Collisions\CompundCollider.cs" />
     <Compile Include="Engine\Controllers\JoyPadController.cs" />
@@ -58,15 +59,17 @@
     <Compile Include="Engine\PhysiscsManager.cs" />
     <Compile Include="Engine\RandomTimer.cs" />
     <Compile Include="Engine\Rigidbody.cs" />
+    <Compile Include="Engine\Tiled\Layer.cs" />
     <Compile Include="Engine\Tiled\TileGrid.cs" />
     <Compile Include="Engine\Tiled\TileGridFactory.cs" />
     <Compile Include="Engine\Tiled\TileInstance.cs" />
-    <Compile Include="Engine\Tiled\TileObj.cs" />
+    <Compile Include="Engine\Tiled\TileProperties.cs" />
     <Compile Include="Engine\Tiled\TileSet.cs" />
     <Compile Include="Engine\Tiled\TileSetFactory.cs" />
     <Compile Include="Engine\Tiled\TileType.cs" />
     <Compile Include="Engine\Tiled\TmxNodeParser.cs" />
     <Compile Include="Engine\Tiled\TmxReader.cs" />
+    <Compile Include="Engine\TileObj.cs" />
     <Compile Include="Engine\UI\Text\Font.cs" />
     <Compile Include="Engine\UI\Text\FontManager.cs" />
     <Compile Include="Engine\Controllers\Controller.cs" />
@@ -100,17 +103,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Assets\map-8x8.tmx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Include="Assets\Levels\map-8x8.tmx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\textSheet.png">
+    <Content Include="Assets\Fonts\textSheet.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\tmw_desert_nospa.png">
+    <Content Include="Assets\Levels\TileSets\tmw_desert_nospa.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

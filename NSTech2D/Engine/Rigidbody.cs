@@ -3,7 +3,7 @@ using OpenTK;
 
 namespace NSTech2D.Engine
 {
-    enum RigidBodyType { Player = 1, PlayerBullet = 2, Enemy = 4, EnemyBullet = 8, PowerUp = 16, Tile = 32 }
+    enum RigidBodyType { Player = 1, PlayerBullet = 2, Enemy = 4, EnemyBullet = 8, PowerUp = 16, TileObj = 32 }
     class Rigidbody
     {
         protected uint collisionsMask;

@@ -1,5 +1,4 @@
-﻿
-namespace NSTech2D.Engine.Tiled
+﻿namespace NSTech2D.Engine.Tiled
 {
     class TileInstance
     {
@@ -16,7 +15,7 @@ namespace NSTech2D.Engine.Tiled
 
         public override string ToString()
         {
-            return Type + " {" + PosX + "," + PosY + "}";
+            return Type + " {"+ PosX +","+ PosY + "}";
         }
     }
 }

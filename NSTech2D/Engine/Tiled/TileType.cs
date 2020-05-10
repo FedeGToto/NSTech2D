@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NSTech2D.Engine.Tiled
+﻿namespace NSTech2D.Engine.Tiled
 {
-    class TileType
+    internal class TileType
     {
         public int Id { get; }
         public string ImagePath { get; }
@@ -14,6 +8,7 @@ namespace NSTech2D.Engine.Tiled
         public int Height { get; }
         public int OffX { get; }
         public int OffY { get; }
+        public TileProperties Props { get; set; }
 
         public TileType(int id, string tsImgPath, int tileW, int tileH, int offX, int offY)
         {
@@ -23,11 +18,12 @@ namespace NSTech2D.Engine.Tiled
             this.Height = tileH;
             this.OffX = offX;
             this.OffY = offY;
+            Props = new TileProperties();
         }
 
         public override string ToString()
         {
-            return "id: " + Id + " (" + OffX + "," + OffY + ")";
+            return "id: " + Id + " (" + OffX + "," + OffY +")";
         }
     }
 }
